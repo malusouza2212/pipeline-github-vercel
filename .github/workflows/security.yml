@@ -1,0 +1,36 @@
+name: Segurança - Dependências
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 9 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    name: Auditoria de dependências
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Auditar dependências de produção
+        run: npm run audit:prod
+
+      - name: Verificar vulnerabilidades conhecidas
+        run: npm audit --audit-level=high
